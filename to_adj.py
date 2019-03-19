@@ -11,7 +11,7 @@ import pymongo as pm
 reload(sys)
 
 # Download of data http://downloads.dbpedia.org/2016-04/core-i18n/en/page_links_en.ttl.bz2
-filename = 'C:/Users/hug_h/rec/page_links.ttl/page_links_en.ttl.bz2'
+filename = sys.argv[1]
 indexName = "dbpedialinks"
 docTypeName = "article"
 
@@ -26,10 +26,10 @@ numOrigLinks = 0
 nameHash = []
 numberArticles = 0
 adj_mat = {}
-client = pm.MongoClient("mongodb://hakeem:runningHug1$@40.85.136.245")
+client = pm.MongoClient()
 
-db = client.adj_list
-collection = db.first_adj_list
+db = client.adj_mat
+collection = db.first_adj
 
 
 def addLink(article, subject):
@@ -51,8 +51,8 @@ def newArticle(subject):
 
 last_line = ""
 
-with bz2.open(filename, "rt", encoding="utf-8") as file:
-#with open(filename, "r", encoding="utf-8") as file:
+#with bz2.open(filename, "rt", encoding="utf-8") as file:
+with open(filename, "r", encoding="utf-8") as file:
     for line in file:
 
         m = linePattern.match(str(line))
@@ -60,13 +60,17 @@ with bz2.open(filename, "rt", encoding="utf-8") as file:
         if m:
             subject = unquote(m.group(1)).replace('_', ' ')
             linkedSubject = unquote(m.group(2)).replace('_', ' ')
+            subject = subject.replace(".","")
             if numberArticles == 0:
 
                 #adj_mat[subject] = []
                 document = {
                     subject: []
                 }
-                collection.insert_one(document)
+                try:
+                    collection.insert_one(document)
+                except Exception as e:
+                    print(e)
                 lastSubject = subject
                 numberArticles += 1
                 print("Current Subject", subject)
@@ -81,7 +85,10 @@ with bz2.open(filename, "rt", encoding="utf-8") as file:
                     "subject": subject,
                     "neighbours": []
                 }
-                collection.insert_one(document)
+                try:
+                    collection.insert_one(document)
+                except Exception as e:
+                    print(e)
                 lastSubject = subject
                 numberArticles += 1
 
@@ -94,15 +101,15 @@ with bz2.open(filename, "rt", encoding="utf-8") as file:
                     print("Current Link", line)
 
             else:
+                try:
+                    collection.find_one_and_update({"subject": subject}, {"$push": {"neighbours": '%s' % linkedSubject}})
+                
+                    numLinks += 1
 
-                collection.find_one_and_update({"subject": subject}, {"$push": {"neighbours": '%s' % linkedSubject}})
-                adj_mat[subject].append(linkedSubject)
-                numLinks += 1
+                except Exception as e:
+
+                   print(e)
 
             last_line = line
 
 
-
-with open("adj_mat.json", 'w+') as file:
-
-    json.dumps(adj_mat, file)
