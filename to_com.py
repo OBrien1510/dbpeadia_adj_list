@@ -1,34 +1,49 @@
-import pickle
-import math
+import pymongo as pm
+import threading
 
-adj = pickle.load("")
+client = pm.MongoClient()
 
-dis_mat = dict()
-
+db = client.adj_mat
 
 def get_common(x, y):
 
     x_set = set(x)
-    y_set = set(adj[y])
+    y_query = db.first_adj.find({"subject:'%s'", y})
+    y_set = set(y_query.neighbours)
 
     common = x_set.intersection(y_set)
 
     return len(common)
 
+def process_cursor(cursor):
 
-for key, item in adj.items():
+    print("cursor spinning up")
 
-    for j in item:
+    for i, document in enumerate(db.first_adj.find()):
 
-        common = get_common(item, j)
+        subject = document.subject
+        neighbours = document.neighbours
 
-        if common == 0:
+        document = {subject: dict()}
 
-            dis_mat[key][j] = math.inf
+        for j in neighbours:
 
-        else:
+            common = get_common(neighbours, j)
+            document[subject][j] = common
 
-            dis_mat[key][j] = 1/common
+        db.first_adj.insert_one(document)
+
+        if i % 10000 == 0:
+
+            print("Documents processed:", i)
 
 
-pickle.dump(dis_mat, "")
+cursors = db.first_adj.parallel_scan(7)
+
+threads = [threading.Thread(target=process_cursor, args=(cursor,))for cursor in cursors]
+
+for thread in threads:
+    thread.start()
+
+for thread in threads:
+    thread.join()
