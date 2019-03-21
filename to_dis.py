@@ -1,36 +1,42 @@
-import pickle
+import pymongo as pm
+import multiprocessing
 
-adj_mat = pickle.load("")
+client = pm.MongoClient()
 
-dis_mat = {}
+db = client.adj_mat
 
-def get_distance(x, y, current_depth):
+def process_cursor(skip_n, limit_n):
 
-    if current_depth >= 10:
+    for i, document in enumerate(db.first_adj.find().skip(skip_n).limit(limit_n)):
 
-        dis_mat[x][y] = current_depth
-        return
+        subject = document["subject"]
+        neighbours = document["neighbours"]
 
-    else:
+        n_neighbours = len(document["neighbours"])
 
-        dis_mat[x][y] = current_depth
-        row = adj_mat[x]
+        document = {subject: dict()}
 
-        for i in row:
+        for key, item in neighbours.items():
 
-            return get_distance(x, i, current_depth + 1)
+            try:
+                similarity = item/n_neighbours
+            except Exception as e:
+                print(e)
+                similarity = 0
+                
+            #db.common_adj.find_one_and_update({"subject": subject}, {"$set" : {"subject.j" : similarity}})
+            document[subject][key] = similarity
 
+        db.first_dis.insert_one(document)
 
-num_items = 0
+cores = 7
+collection_size = db.first_adj.count()
+batch_size = collection_size//7
+skips = range(0, collection_size, batch_size)
+threads = [multiprocessing.Process(target=process_cursor, args=(skip_n, batch_size))for skip_n in skips]
 
-for key, item in adj_mat.items():
+for thread in threads:
+    thread.start()
 
-    if num_items % 100000 == 0:
-
-        print("Current item", key)
-        print("#%d" % num_items)
-
-    get_distance(key, key, 0)
-
-    
-pickle.dump(dis_mat, "")
+for thread in threads:
+    thread.join()
