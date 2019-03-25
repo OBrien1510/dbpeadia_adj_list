@@ -11,7 +11,9 @@ db.common_adj.delete_many({})
 def get_common(x, y):
 
     x_set = set(x)
-    filter = {"subject": str(y.replace(".",""))}
+    y = y.replace(".", "")
+    y = y.replace("$", "")
+    filter = {"subject": str(y)}
     try:
         
         y_query = db.first_adj.find_one(filter)
@@ -27,32 +29,41 @@ def get_common(x, y):
         return 0
 
 def process_cursor(skip_n, limit_n):
-
+    
     print("cursor spinning up")
-
-    for i, document in enumerate(db.first_adj.find().skip(skip_n).limit(limit_n)):
-        try:
-            subject = document["subject"]
-            neighbours = document["neighbours"]
-        except Exception as e:
-            #print(e)
-            #print(document)
-            continue
+    process_client = pm.MongoClient()
+    db = process_client.adj_mat
+    try:
+        for i, document in enumerate(db.first_adj.find().skip(skip_n).limit(limit_n).batch_size(100)):
+            try:
+                subject = document["subject"]
+                neighbours = document["neighbours"]
+            except Exception as e:
+                #print(e)
+                #print(document)
+                continue
             
-        document = {subject: dict()}
+            document = {subject: dict()}
 
-        for j in neighbours:
+            for j in neighbours:
 
-            common = get_common(neighbours, j)
-            document[subject.replace(".", "")][j.replace(".","")] = common
+                common = get_common(neighbours, j)
+                document[subject.replace(".", "")][j.replace(".","")] = common
 
-        #print(document)
-        db.common_adj.insert_one(document)
+            try:
+                db.common_adj.insert_one(document)
+            except Exception as e:
+                print(e)
+                print("Failure on doc insert")
 
-        if i % 10000 == 0:
 
-            print("Documents processed:", i)
-            
+            if i % 10000 == 0:
+
+                print("Documents processed:", i)
+
+    except Exception as e:
+        print(e)
+        print("failed on find")        
 
 
 cores = 7
