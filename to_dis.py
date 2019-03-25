@@ -24,8 +24,6 @@ def process_cursor(skip_n, limit_n):
 
         #initialize empty list to hold the keys for our eventual similarity dict
         neighbours_list = list()
-        max_sim = 0
-        min_sim = math.inf
 
         for i, (key, item) in enumerate(neighbours.items()):
 
@@ -41,21 +39,24 @@ def process_cursor(skip_n, limit_n):
 
             #document[subject][key] = similarity
             similarities[i] = similarity
-            if similarity > max_sim:
-                max_sim = similarity
-            elif similarity < min_sim:
-                min_sim = similarity
 
             neighbours_list.append(key)
-
-        difference = max_sim - min_sim
 
         #we wish to normalize all distances for each article into the range 1-0
         #and then get the inverse to convert into our distance proxy
         #we use numpy elementwise operations for this
-        f = lambda x: 1/((x - min_sim)/difference)
+        y = lambda x: (1 / x)
 
-        normalized = f(similarities)
+        inverse = y(similarities)
+
+        min_sim = np.min(inverse)
+        max_sim = np.max(inverse)
+
+        difference = max_sim - min_sim
+
+        f = lambda x: (x - min_sim) / difference
+
+        normalized = f(inverse)
 
         #convert numpy array back to regualar list
         similarities = list(normalized)
