@@ -8,6 +8,8 @@ db = client.adj_mat
 print("Clearing collection")
 db.common_adj.delete_many({})
 
+client.close()
+
 def get_common(x, y):
 
     x_set = set(x)
@@ -29,6 +31,10 @@ def get_common(x, y):
 def process_cursor(skip_n, limit_n):
 
     print("cursor spinning up")
+
+    client = pm.MongoClient(connect=False)
+
+    db = client.adj_mat
 
     for i, document in enumerate(db.first_adj.find().skip(skip_n).limit(limit_n)):
         try:
