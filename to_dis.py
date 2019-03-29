@@ -18,12 +18,16 @@ def process_cursor(skip_n, limit_n):
 
         n_neighbours = len(document["neighbours"])
         #initialize empty dictionary to  hold document
-        document = {subject: subject, neighbours: dict()}
+        document = {"subject": subject, "neighbours": dict()}
 
-        for i, (key, item) in enumerate(neighbours.items()):
-            if n_neighbours == 0:
-                document[neighbours][item] = 1
-            else:
+        if n_neighbours == 0:
+
+            document["neighbours"][neighbours.keys()[0]] = 1
+
+        else:
+
+            for i, (key, item) in enumerate(neighbours.items()):
+
                 neighbours_list = list()
                 similarities = np.ones(n_neighbours)
                 try:
@@ -63,7 +67,8 @@ def process_cursor(skip_n, limit_n):
             #combine list with keys with the lsit of normalized values to get final dict
             similarity_dict = dict(zip(neighbours_list, similarities))
 
-            document[neighbours][item] = similarity_dict
+            document["neighbours"] = similarity_dict
+
 
         #finally insert document
         db.first_dis.insert_one(document)
