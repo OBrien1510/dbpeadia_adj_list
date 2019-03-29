@@ -51,7 +51,7 @@ def process_cursor(skip_n, limit_n):
             for j in neighbours:
 
                 common = get_common(neighbours, j)
-                document["neighbours"][subject.replace(".", "")][j.replace(".","")] = common
+                document["neighbours"][j.replace(".","")] = common
 
             try:
                 db.common_adj.insert_one(document)

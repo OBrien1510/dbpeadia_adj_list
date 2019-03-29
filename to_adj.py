@@ -65,7 +65,8 @@ with open(filename, "r", encoding="utf-8") as file:
 
                 #adj_mat[subject] = []
                 document = {
-                    subject: []
+                    "subject": subject,
+                    "neighbours": [linkedSubject]
                 }
                 try:
                     collection.insert_one(document)
@@ -83,7 +84,7 @@ with open(filename, "r", encoding="utf-8") as file:
                 #adj_mat[subject] = []
                 document = {
                     "subject": subject,
-                    "neighbours": []
+                    "neighbours": [linkedSubject]
                 }
                 try:
                     collection.insert_one(document)

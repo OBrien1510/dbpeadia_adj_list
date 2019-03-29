@@ -7,9 +7,11 @@ client = pm.MongoClient()
 
 db = client.adj_mat
 
+db.first_dis.remove({})
+
 def process_cursor(skip_n, limit_n):
 
-    for i, document in enumerate(db.first_adj.find().skip(skip_n).limit(limit_n)):
+    for i, document in enumerate(db.common_adj.find().skip(skip_n).limit(limit_n)):
 
         subject = document["subject"]
         neighbours = document["neighbours"]
@@ -19,14 +21,9 @@ def process_cursor(skip_n, limit_n):
         #initialize empty dictionary to  hold document
         document = {subject: dict()}
 
-        #initialize empty numpy array to hold similarity metrics
-        similarities = np.empty_like(n_neighbours)
-
-        #initialize empty list to hold the keys for our eventual similarity dict
-        neighbours_list = list()
-
         for i, (key, item) in enumerate(neighbours.items()):
-
+            neighbours_list = list()
+            similarities = np.ones(n_neighbours)
             try:
                 #similarity metric: The number of common links with another article divided by the total number
                 #of links in the entire article
@@ -38,7 +35,7 @@ def process_cursor(skip_n, limit_n):
             #db.common_adj.find_one_and_update({"subject": subject}, {"$set" : {"subject.j" : similarity}})
 
             #document[subject][key] = similarity
-            similarities[i] = similarity
+            similarities[i-1] = similarity
 
             neighbours_list.append(key)
 
