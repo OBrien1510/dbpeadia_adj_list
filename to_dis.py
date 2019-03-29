@@ -17,51 +17,53 @@ def process_cursor(skip_n, limit_n):
         neighbours = document["neighbours"]
 
         n_neighbours = len(document["neighbours"])
-
         #initialize empty dictionary to  hold document
-        document = {subject: dict()}
+        document = {subject: subject, neighbours: dict()}
 
         for i, (key, item) in enumerate(neighbours.items()):
-            neighbours_list = list()
-            similarities = np.ones(n_neighbours)
-            try:
-                #similarity metric: The number of common links with another article divided by the total number
-                #of links in the entire article
-                similarity = item+1/n_neighbours
-            except Exception as e:
-                print(e)
-                similarity = 0
+            if n_neighbours == 0:
+                document[neighbours][item] = 1
+            else:
+                neighbours_list = list()
+                similarities = np.ones(n_neighbours)
+                try:
+                    #similarity metric: The number of common links with another article divided by the total number
+                    #of links in the entire article
+                    similarity = item+1/n_neighbours
+                except Exception as e:
+                    print(e)
+                    similarity = 0
 
-            #db.common_adj.find_one_and_update({"subject": subject}, {"$set" : {"subject.j" : similarity}})
+                #db.common_adj.find_one_and_update({"subject": subject}, {"$set" : {"subject.j" : similarity}})
 
-            #document[subject][key] = similarity
-            similarities[i-1] = similarity
+                #document[subject][key] = similarity
+                similarities[i-1] = similarity
 
-            neighbours_list.append(key)
+                neighbours_list.append(key)
 
-        #we wish to normalize all distances for each article into the range 1-0
-        #and then get the inverse to convert into our distance proxy
-        #we use numpy elementwise operations for this
-        y = lambda x: (1 / x)
+            #we wish to normalize all distances for each article into the range 1-0
+            #and then get the inverse to convert into our distance proxy
+            #we use numpy elementwise operations for this
+            y = lambda x: (1 / x)
 
-        inverse = y(similarities)
+            inverse = y(similarities)
 
-        min_sim = np.min(inverse)
-        max_sim = np.max(inverse)
+            min_sim = np.min(inverse)
+            max_sim = np.max(inverse)
 
-        difference = max_sim - min_sim
+            difference = max_sim - min_sim
 
-        f = lambda x: (x - min_sim) / difference
+            f = lambda x: (x - min_sim) / difference
 
-        normalized = f(inverse)
+            normalized = f(inverse)
 
-        #convert numpy array back to regualar list
-        similarities = list(normalized)
+            #convert numpy array back to regualar list
+            similarities = list(normalized)
 
-        #combine list with keys with the lsit of normalized values to get final dict
-        similarity_dict = dict(zip(neighbours_list, similarities))
+            #combine list with keys with the lsit of normalized values to get final dict
+            similarity_dict = dict(zip(neighbours_list, similarities))
 
-        document[subject] = similarity_dict
+            document[neighbours][item] = similarity_dict
 
         #finally insert document
         db.first_dis.insert_one(document)
