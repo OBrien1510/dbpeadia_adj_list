@@ -11,11 +11,13 @@ db.first_dis.remove({})
 
 def get_similarity(n):
 
-    doc = db.common_adj.find({"subject":'%s' % n})
+    doc = db.common_adj.find({"subject":n})
+
+    print(doc)
 
     n_neighbours = len(list(doc["neighbours"].keys()))
 
-    return n_neighbours
+    return doc
 
 def process_cursor(skip_n, limit_n):
 
@@ -34,14 +36,24 @@ def process_cursor(skip_n, limit_n):
 
         else:
 
+            neighbours_list = list()
+            similarities = np.ones(n_neighbours)
+
             for i, (key, item) in enumerate(neighbours.items()):
 
-                neighbours_list = list()
-                similarities = np.ones(n_neighbours)
+
                 try:
                     #similarity metric: The number of common links with another article divided by the total number
                     #of links in the entire article
-                    similarity = (item+1)*get_similarity(key)/n_neighbours
+                    n = get_similarity(key)
+
+                    if n != None:
+                        n = len(list(n["neighbours"].keys()))
+                        similarity = (item+1)*n/n_neighbours
+
+                    else:
+                        similarity = 1/n_neighbours
+
                 except Exception as e:
                     print(e)
                     similarity = 0
