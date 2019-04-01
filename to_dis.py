@@ -1,6 +1,6 @@
 import pymongo as pm
 import multiprocessing
-import math
+import re
 import numpy as np
 
 client = pm.MongoClient()
@@ -37,6 +37,17 @@ def process_cursor(skip_n, limit_n):
 
             for i, (key, item) in enumerate(neighbours.items()):
 
+                pattern = re.compile("Category:(.+)")
+
+                m = pattern.match(key)
+
+                if m:
+
+                    cleaned_neighbour = m.group(1)
+
+                else:
+
+                    cleaned_neighbour = neighbours
 
                 try:
                     #similarity metric: The number of common links with another article divided by the total number
@@ -59,7 +70,7 @@ def process_cursor(skip_n, limit_n):
                 #document[subject][key] = similarity
                 similarities[i-1] = similarity
 
-                neighbours_list.append(key)
+                neighbours_list.append(cleaned_neighbour)
 
             #we wish to normalize all distances for each article into the range 1-0
             #and then get the inverse to convert into our distance proxy
