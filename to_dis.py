@@ -9,6 +9,14 @@ db = client.adj_mat
 
 db.first_dis.remove({})
 
+def get_similarity(n):
+
+    doc = db.common_adj.find({"subject":'%s' % n})
+
+    n_neighbours = len(list(doc["neighbours"].keys()))
+
+    return n_neighbours
+
 def process_cursor(skip_n, limit_n):
 
     for i, document in enumerate(db.common_adj.find().skip(skip_n).limit(limit_n)):
@@ -33,7 +41,7 @@ def process_cursor(skip_n, limit_n):
                 try:
                     #similarity metric: The number of common links with another article divided by the total number
                     #of links in the entire article
-                    similarity = item+1/n_neighbours
+                    similarity = (item+1)*get_similarity(key)/n_neighbours
                 except Exception as e:
                     print(e)
                     similarity = 0
