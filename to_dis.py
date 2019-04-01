@@ -11,11 +11,7 @@ db.first_dis.remove({})
 
 def get_similarity(n):
 
-    doc = db.common_adj.find({"subject":n})
-
-    print(doc)
-
-    n_neighbours = len(list(doc["neighbours"].keys()))
+    doc = db.common_adj.find_one({"subject":n})
 
     return doc
 
