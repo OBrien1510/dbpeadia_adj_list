@@ -17,19 +17,19 @@ def get_similarity(n):
 
 def process_cursor(skip_n, limit_n):
 
-    for i, document in enumerate(db.common_adj.find().skip(skip_n).limit(limit_n)):
+    for i, document in enumerate(db.common_adj.find().skip(skip_n).limit(limit_n).batch_size(100)):
 
         subject = document["subject"]
         neighbours = document["neighbours"]
 
-        n_neighbours = len(document["neighbours"])
+        n_neighbours = len(neighbours)
         #initialize empty dictionary to  hold document
         document = {"subject": subject, "neighbours": dict()}
 
-        if n_neighbours == 0:
+        if n_neighbours == 1:
 
-            document["neighbours"][neighbours.keys()[0]] = 1
-
+            document["neighbours"][list(neighbours.keys())[0]] = 0
+            
         else:
 
             neighbours_list = list()
@@ -48,7 +48,7 @@ def process_cursor(skip_n, limit_n):
                         similarity = (item+1)*n/n_neighbours
 
                     else:
-                        similarity = 1/n_neighbours
+                        similarity = item+1/n_neighbours
 
                 except Exception as e:
                     print(e)
@@ -75,7 +75,11 @@ def process_cursor(skip_n, limit_n):
 
             f = lambda x: (x - min_sim) / difference
 
+            f2 = lambda x: abs(x -1)
+
             normalized = f(inverse)
+
+            normalized = f2(normalized)
 
             #convert numpy array back to regualar list
             similarities = list(normalized)
@@ -87,6 +91,9 @@ def process_cursor(skip_n, limit_n):
 
 
         #finally insert document
+        if len(list(document["neighbours"].keys())) == 1:
+            document["neighbours"][list(document["neighbours"].keys())[0]] = 0
+
         db.first_dis.insert_one(document)
 
 
