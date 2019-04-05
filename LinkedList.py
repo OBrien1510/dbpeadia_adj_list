@@ -57,7 +57,7 @@ class LinkedList:
 
         while current.get_next() is not None:
 
-            if (n.similarity <= current.similarity) and (n.similarity >= previous.similarity):
+            if (n.get_sim() <= current.similarity) and (n.get_sim() >= previous.similarity):
 
                 n.change_next(current)
                 previous.change_next(n)
@@ -76,7 +76,7 @@ class LinkedList:
 
         if node is not None:
 
-            node.set_sim(n.similarity**2)
+            node.set_sim(n.get_sim()**2)
 
     def search(self, n):
 
@@ -100,21 +100,21 @@ class LinkedList:
 
         if exists is not None:
 
-            if exists.similarity < n.similarity:
+            if exists.get_sim() < n.get_sim():
 
-                exists.set_sim(n.similarity**2)
+                exists.set_sim(n.get_sim()**2)
 
             else:
 
-                exists.set_sim(exists.similarity**2)
+                exists.set_sim(exists.get_sim()**2)
 
             return
 
-        if n.similarity <= self._head.get_sim():
+        if n.get_sim() <= self._head.get_sim():
 
             self.add_node_head(n)
 
-        elif n.similarity >= self._tail.get_sim():
+        elif n.get_sim() >= self._tail.get_sim():
 
             self.add_node_tail(n)
 

@@ -13,7 +13,7 @@ def process_subject(current, dis_dict, depth, seen):
     if depth == 3:
         return dis_dict
 
-    document = db.first_dis.find({"subject": current["subject"]})
+    document = db.first_dis.find_one({"subject": current["subject"]})
     neighbours = document["neighbours"]
 
     for key, item in neighbours.items():
@@ -38,7 +38,7 @@ def process_cursor(skip_n, limit_n):
         
         doc_insert = {"subject": subject, "neighbours": dict()}
 
-        distance_dict = process_subject(subject, LinkedList(), 0, set())
+        distance_dict = process_subject({"subject": subject, "distance": 0}, LinkedList(), 0, set())
 
         doc_insert["neighbours"] = distance_dict.linkedlist
 
