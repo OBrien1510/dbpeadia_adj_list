@@ -35,7 +35,7 @@ def process_cursor(skip_n, limit_n):
 
 
         subject = document["subject"]
-        neighbours = document["neighbours"]
+        
         doc_insert = {"subject": subject, "neighbours": dict()}
 
         distance_dict = process_subject(subject, LinkedList(), 0, set())
@@ -45,6 +45,7 @@ def process_cursor(skip_n, limit_n):
         try:
 
             db.first_dis.insert_one(doc_insert)
+            distance_dict = 0
 
         except Exception as e:
 
