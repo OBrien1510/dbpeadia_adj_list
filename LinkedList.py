@@ -46,6 +46,7 @@ class LinkedList:
     def add_node_head(self, n):
 
         n.change_next(self.head)
+        self.linkedlist[n.subject] = n
         self._head = n
         self.length += 1
 
@@ -60,6 +61,7 @@ class LinkedList:
 
                 n.change_next(current)
                 previous.change_next(n)
+                self.linkedlist[n.subject] = n
                 self.length += 1
                 break
 

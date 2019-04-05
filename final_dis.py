@@ -40,7 +40,7 @@ def process_cursor(skip_n, limit_n):
 
         distance_dict = process_subject(subject, LinkedList(), 0, set())
 
-        doc_insert["neighbours"] = distance_dict
+        doc_insert["neighbours"] = distance_dict.linkedlist
 
         try:
 
