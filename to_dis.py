@@ -2,6 +2,7 @@ import pymongo as pm
 import multiprocessing
 import re
 import numpy as np
+import math
 
 client = pm.MongoClient()
 
@@ -42,24 +43,19 @@ def process_cursor(skip_n, limit_n):
                 m = pattern.match(key)
 
                 if m:
-
+                    
                     cleaned_neighbour = m.group(1)
 
                 else:
 
-                    cleaned_neighbour = neighbours
+                    cleaned_neighbour = key
 
                 try:
                     #similarity metric: The number of common links with another article divided by the total number
                     #of links in the entire article
-                    n = get_similarity(key)
+                    #n = get_similarity(key)
 
-                    if n != None:
-                        n = len(list(n["neighbours"].keys()))
-                        similarity = (item+1)*n/n_neighbours
-
-                    else:
-                        similarity = item+1/n_neighbours
+                    similarity =  (1/((item+1)/1+math.log(n_neighbours)))
 
                 except Exception as e:
                     print(e)
