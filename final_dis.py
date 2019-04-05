@@ -8,9 +8,9 @@ db = client.adj_mat
 
 db.final_dis.remove({})
 
-def process_subject(current, dis_dict, depth):
+def process_subject(current, dis_dict, depth, seen):
 
-    if depth == 5:
+    if depth == 3:
         return dis_dict
 
     document = db.first_dis.find({"subject": current["subject"]})
@@ -20,8 +20,12 @@ def process_subject(current, dis_dict, depth):
 
         distance = current["distance"] + item
         current = Node(distance, None, key)
-        dis_dict.check_sim(current)
-        return process_subject({"subject": key, "distance": distance}, dis_dict, depth+1)
+        if key not in seen:
+            dis_dict.check_sim(current)
+            seen.add(key)
+        else:
+            dis_dict.update_node(current)
+        return process_subject({"subject": key, "distance": distance}, dis_dict, depth+1, seen)
 
 def process_cursor(skip_n, limit_n):
 
@@ -32,7 +36,7 @@ def process_cursor(skip_n, limit_n):
         neighbours = document["neighbours"]
         doc_insert = {"subject": subject, "neighbours": dict()}
 
-        distance_dict = process_subject(subject, LinkedList(), 0)
+        distance_dict = process_subject(subject, LinkedList(), 0, set())
 
         doc_insert["neighbours"] = distance_dict
 

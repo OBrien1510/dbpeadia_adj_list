@@ -1,3 +1,5 @@
+import math
+
 class Node:
 
     def __init__(self, similarity=0, nextval=None, subject= ""):
@@ -20,6 +22,10 @@ class Node:
     def get_next(self):
 
         return self._nextval
+
+    def set_sim(self, n):
+
+        self._similarity = n
 
 
 class LinkedList:
@@ -62,8 +68,45 @@ class LinkedList:
                 previous = current
                 current = current.nextval
 
+    def update_node(self, n):
+
+        node = self.search(n.subject)
+
+        if node is not None:
+
+            node.set_sim(n.similarity**2)
+
+    def search(self, n):
+
+        current = self._head
+
+        while current is not None:
+
+            if current.subject == n:
+
+                return current
+
+            else:
+
+                current = current.get_next()
+
+        return None
 
     def check_sim(self, n):
+
+        exists = self.search(n.subject)
+
+        if exists is not None:
+
+            if exists.similarity < n.similarity:
+
+                exists.set_sim(n.similarity**2)
+
+            else:
+
+                exists.set_sim(exists.similarity**2)
+
+            return
 
         if n.similarity <= self._head.get_sim():
 

@@ -55,7 +55,7 @@ def process_cursor(skip_n, limit_n):
                     #of links in the entire article
                     #n = get_similarity(key)
 
-                    similarity =  (1/((item+1)/1+math.log(n_neighbours)))
+                    similarity = (1/((item+1)/1+math.log(n_neighbours)))
 
                 except Exception as e:
                     print(e)
