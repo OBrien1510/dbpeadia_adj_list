@@ -35,7 +35,7 @@ def process_cursor(skip_n, limit_n):
 
 
         subject = document["subject"]
-        
+
         doc_insert = {"subject": subject, "neighbours": dict()}
 
         distance_dict = process_subject({"subject": subject, "distance": 0}, LinkedList(), 0, set())

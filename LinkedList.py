@@ -94,7 +94,13 @@ class LinkedList:
 
         return None
 
+
     def check_sim(self, n):
+
+        if self.length == 0:
+            self.add_node_head(n)
+            self._tail = n
+            return
 
         exists = self.search(n.subject)
 
@@ -118,7 +124,7 @@ class LinkedList:
 
             self.add_node_tail(n)
 
-        elif (n.get_sim() > self._head.get_sim()) and (n.get_sim() < self._tail.get_sim()) or (self.length < 20):
+        elif (n.get_sim() > self._head.get_sim()) and (n.get_sim() < self._tail.get_sim()) or (self.length < 50):
 
             self.add_node_middle(n)
 
