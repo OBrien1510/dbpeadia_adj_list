@@ -25,7 +25,9 @@ def process_subject(current, dis_dict, depth, seen):
             seen.add(key)
         else:
             dis_dict.update_node(current)
-        return process_subject({"subject": key, "distance": distance}, dis_dict, depth+1, seen)
+        dis_dict = process_subject({"subject": key, "distance": distance}, dis_dict, depth+1, seen)
+
+    return dis_dict
 
 def process_cursor(skip_n, limit_n):
 
