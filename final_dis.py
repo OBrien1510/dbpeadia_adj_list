@@ -1,6 +1,7 @@
 import pymongo as pm
 import multiprocessing
 from LinkedList import *
+import math
 
 client = pm.MongoClient()
 
@@ -10,22 +11,32 @@ db.final_dis.remove({})
 
 def process_subject(current, dis_dict, depth, seen):
 
+    #dis_dict.to_str()
     if depth == 3:
-        return dis_dict
+       return dis_dict
 
     document = db.first_dis.find_one({"subject": current["subject"]})
+    # if query returns nothing, branch is dead so return
+    if document == None:
+        print("no document found... returning")
+        return dis_dict
     neighbours = document["neighbours"]
-
+    
     for key, item in neighbours.items():
-
-        distance = current["distance"] + item
-        current = Node(distance, None, key)
-        if key not in seen:
-            dis_dict.check_sim(current)
-            seen.add(key)
-        else:
-            dis_dict.update_node(current)
-        dis_dict = process_subject({"subject": key, "distance": distance}, dis_dict, depth+1, seen)
+        # occasionally some of the distances will be nan, skip these branches
+        if math.isnan(float(item)):
+            print(item)
+            print(subject)        
+        distance = current["distance"] + float(item)
+        current_node = Node(distance, None, key)
+        print("before")
+        dis_dict.to_str()
+        dis_dict.check_sim(current_node)
+        print("after")
+        dis_dict.to_str()
+         
+        # recursively update the current linked list with the next neighbour
+        process_subject({"subject": key, "distance": distance}, dis_dict, depth+1, seen)
 
     return dis_dict
 
@@ -35,22 +46,19 @@ def process_cursor(skip_n, limit_n):
 
 
         subject = document["subject"]
+        if i % 1000:
+            print("Article #", i)
+            print("Subject", subject)
 
         doc_insert = {"subject": subject, "neighbours": dict()}
 
-        distance_dict = process_subject({"subject": subject, "distance": 0}, LinkedList(), 0, set())
-
-        doc_insert["neighbours"] = distance_dict.linkedlist
-
         try:
-
-            db.first_dis.insert_one(doc_insert)
-            distance_dict = 0
-
+            distance_dict = process_subject({"subject": subject, "distance": 0}, LinkedList(), 0, set())
+            doc_insert["neighbours"] = distance_dict.linkedlist
+            db.final_dis.insert_one(doc_insert)
         except Exception as e:
-
+            print("Failed process subject")
             print(e)
-            print("Failed to insert subject:", subject)
 
 
 cores = 7
