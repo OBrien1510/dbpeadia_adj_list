@@ -3,11 +3,10 @@ import pprint as pp
 
 class Node:
 
-    def __init__(self, similarity=0, nextval=None, subject= "", length=50):
+    def __init__(self, similarity=0, nextval=None, subject= ""):
         self._similarity = similarity
         self.subject = subject
         self._nextval = nextval
-        self.max_length = length
         self.node = {"subject": subject,
                      "similarity": similarity,
                      "nextval": nextval}
@@ -35,9 +34,10 @@ class Node:
 
 class LinkedList:
 
-    def __init__(self):
+    def __init__(self, length=50):
         self._head = None
         self._tail = None
+        self._max_length = length
         self.length = 0
         self.linkedlist = {"length": 0}
 
@@ -56,6 +56,11 @@ class LinkedList:
         self.linkedlist[n.subject] = n.node
         self._head = n
         self.length += 1
+
+        if self.length > self._max_length:
+            self.remove_tail()
+            self.length -= 1
+
         self.linkedlist["length"] = self.length
 
     def add_node_middle(self, n):
@@ -78,6 +83,26 @@ class LinkedList:
 
                 previous = current
                 current = current.get_next()
+
+    def remove_tail(self):
+
+        current = self._head
+
+        while current is not None and current.get_next() is not None:
+            # if next value is the tail, delete the tail and make the current the next tail
+            if current.get_next() == self._tail:
+
+                self._tail = current
+                current.change_next(None)
+                self.linkedlist[current.subject] = current.node
+
+                # remove all references to previous tail node
+                del self.linkedlist[current.get_next().subject]
+                next_val = current.get_next()
+                del next_val
+                return
+
+            current = current.get_next()
 
     def update_node(self, n):
 
@@ -143,6 +168,10 @@ class LinkedList:
     def get_tail(self):
 
         return self._tail
+
+    def get_max(self):
+
+        return self._max_length
 
     def to_str(self):
   
