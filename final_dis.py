@@ -20,21 +20,14 @@ def process_subject(current, dis_dict, depth, seen):
     if document == None:
         print("no document found... returning")
         return dis_dict
+
     neighbours = document["neighbours"]
     
     for key, item in neighbours.items():
         # occasionally some of the distances will be nan, skip these branches
-        if math.isnan(float(item)):
-            print(item)
-            print(subject)        
         distance = current["distance"] + float(item)
         current_node = Node(distance, None, key)
-        print("before")
-        dis_dict.to_str()
-        dis_dict.check_sim(current_node)
-        print("after")
-        dis_dict.to_str()
-         
+        dis_dict.check_sim(current_node)         
         # recursively update the current linked list with the next neighbour
         process_subject({"subject": key, "distance": distance}, dis_dict, depth+1, seen)
 
@@ -42,7 +35,7 @@ def process_subject(current, dis_dict, depth, seen):
 
 def process_cursor(skip_n, limit_n):
 
-    for i, document in enumerate(db.first_dis.find().skip(skip_n).limit(limit_n)):
+    for i, document in enumerate(db.first_dis.find().skip(skip_n).limit(limit_n).batch_size(100)):
 
 
         subject = document["subject"]

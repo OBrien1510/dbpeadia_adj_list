@@ -71,7 +71,6 @@ class LinkedList:
         while current is not None and current.get_next() is not None:
 
             if (n.get_sim() <= current.get_sim()) and (n.get_sim() >= previous.get_sim()):
-                print("adding node")
                 n.change_next(current)
                 previous.change_next(n)
                 self.linkedlist[n.subject] = n.node
