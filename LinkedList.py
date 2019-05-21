@@ -24,6 +24,8 @@ class Node:
 
 class LinkedList:
 
+    # similiarity = distance so smaller the better
+
     def __init__(self):
         self._head = None
         self._tail = None
@@ -52,6 +54,7 @@ class LinkedList:
 
             if (n.similarity <= current.similarity) and (n.similarity >= previous.similarity):
 
+                # if similarity is between previous and current node
                 n.change_next(current)
                 previous.change_next(n)
                 self.length += 1
@@ -59,6 +62,7 @@ class LinkedList:
 
             else:
 
+                # else continue through linked list
                 previous = current
                 current = current.nextval
 
@@ -69,11 +73,11 @@ class LinkedList:
 
             self.add_node_head(n)
 
-        elif n.similarity >= self._tail.get_sim():
+        elif n.similarity >= self._tail.get_sim() and self.length <= 20:
 
             self.add_node_tail(n)
 
-        elif (n.get_sim() > self._head.get_sim()) and (n.get_sim() < self._tail.get_sim()) or (self.length < 20):
+        elif (n.get_sim() > self._head.get_sim()) and (n.get_sim() < self._tail.get_sim()) or (self.length <= 20):
 
             self.add_node_middle(n)
 
