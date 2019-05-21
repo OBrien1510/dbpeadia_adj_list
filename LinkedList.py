@@ -3,14 +3,14 @@ class Node:
     def __init__(self, similarity=0, nextval=None, subject= ""):
         self._similarity = similarity
         self.subject = subject
-        self._nextval = nextval
+        self.nextval = nextval
         self.node = {"subject": subject,
                      "similarity": similarity,
                      "nextval": nextval}
 
     def change_next(self, n):
 
-        self._nextval = n
+        self.nextval = n
         if n is None:
             subject = "None"
         else:
@@ -23,7 +23,7 @@ class Node:
 
     def get_next(self):
 
-        return self._nextval
+        return self.nextval
 
 
 class LinkedList:
@@ -57,7 +57,7 @@ class LinkedList:
 
         while current.get_next() is not None:
 
-            if (n.get_sim <= current.get_sim) and (n.get_sim >= previous.get_sim):
+            if (n.get_sim() <= current.get_sim()) and (n.get_sim() >= previous.get_sim()):
 
                 # if similarity is between previous and current node
                 n.change_next(current)
@@ -80,7 +80,25 @@ class LinkedList:
            self.head = n
            self.tail = n
            self.length += 1
+           
+        elif self.length == 1:
 
+           if n.get_sim() <= self.head.get_sim():
+
+               self.head = n
+               self.head.change_next(self.tail)
+               #print("next", self.tail)
+               
+           else:
+
+               self.tail = n
+               self.head.change_next(n)
+               #print("next", n)
+
+           #print("head next", self.head.nextval)
+           self.linkedlist[n.subject] = n.node
+           self.length += 1
+   
         elif n.get_sim() <= self.head.get_sim():
 
             self.add_node_head(n)
