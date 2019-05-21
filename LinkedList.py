@@ -11,7 +11,11 @@ class Node:
     def change_next(self, n):
 
         self._nextval = n
-        self.node["nextval"] = n.subject
+        if n is None:
+            subject = "None"
+        else:
+            subject = n.subject
+        self.node["nextval"] = subject
 
     def get_sim(self):
 
@@ -27,22 +31,23 @@ class LinkedList:
     # similiarity = distance so smaller the better
 
     def __init__(self):
-        self._head = None
-        self._tail = None
+        self.head = None
+        self.tail = None
         self.length = 0
         self.linkedlist = {}
 
     def add_node_tail(self, n):
 
-        self._tail.change_next(n)
+        self.tail.change_next(n)
         n.change_next(None)
-        self.linkedlist[n.subject] = n
+        self.linkedlist[n.subject] = n.node
         self.length += 1
 
     def add_node_head(self, n):
 
         n.change_next(self.head)
-        self._head = n
+        self.linkedlist[n.subject] = n.node
+        self.head = n
         self.length += 1
 
     def add_node_middle(self, n):
@@ -52,11 +57,12 @@ class LinkedList:
 
         while current.get_next() is not None:
 
-            if (n.similarity <= current.similarity) and (n.similarity >= previous.similarity):
+            if (n.get_sim <= current.get_sim) and (n.get_sim >= previous.get_sim):
 
                 # if similarity is between previous and current node
                 n.change_next(current)
                 previous.change_next(n)
+                self.linkedlist[n.subject] = n.node
                 self.length += 1
                 break
 
@@ -68,23 +74,29 @@ class LinkedList:
 
 
     def check_sim(self, n):
+ 
+        if self.length == 0:
 
-        if n.similarity <= self._head.get_sim():
+           self.head = n
+           self.tail = n
+           self.length += 1
+
+        elif n.get_sim() <= self.head.get_sim():
 
             self.add_node_head(n)
 
-        elif n.similarity >= self._tail.get_sim() and self.length <= 20:
+        elif n.get_sim() >= self.tail.get_sim() and self.length <= 20:
 
             self.add_node_tail(n)
 
-        elif (n.get_sim() > self._head.get_sim()) and (n.get_sim() < self._tail.get_sim()) or (self.length <= 20):
+        elif (n.get_sim() > self.head.get_sim()) and (n.get_sim() < self.tail.get_sim()) or (self.length <= 20):
 
             self.add_node_middle(n)
 
     def get_head(self):
 
-        return self._head
+        return self.head
 
     def get_tail(self):
 
-        return self._tail
+        return self.tail
